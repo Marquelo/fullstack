@@ -1,6 +1,7 @@
 package ferreterias.com.nose.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -31,6 +32,19 @@ public class Product {
     @Positive(message = "El precio debe ser mayor a cero")
     @Column(name = "precio", nullable = false, precision = 10, scale = 2)
     private BigDecimal precio;
+
+    @Positive(message = "El precio de oferta debe ser mayor a cero")
+    @Column(name = "precio_oferta", precision = 10, scale = 2)
+    private BigDecimal precioOferta;
+
+    @NotNull(message = "El stock es obligatorio")
+    @Min(value = 0, message = "El stock no puede ser negativo")
+    @Column(name = "stock", nullable = false)
+    private Integer stock = 0;
+
+    @Size(max = 255, message = "La ruta de la imagen no puede superar los 255 caracteres")
+    @Column(name = "imagen")
+    private String imagen;
 
     @NotNull(message = "La categoría es obligatoria")
     @ManyToOne(fetch = FetchType.EAGER)

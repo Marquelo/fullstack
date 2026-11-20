@@ -1,12 +1,13 @@
 package ferreterias.com.nose.controller;
 
+import ferreterias.com.nose.dto.StockRequest;
 import ferreterias.com.nose.model.Product;
 import ferreterias.com.nose.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,8 +17,11 @@ import java.util.List;
 @RequestMapping("/api/productos")
 public class ProductController {
 
-    @Autowired
-    private ProductService productService;
+    private final ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
 
     @Operation(summary = "Listar productos")
     @GetMapping
@@ -28,31 +32,32 @@ public class ProductController {
     @Operation(summary = "Obtener producto por id")
     @GetMapping("/{id}")
     public ResponseEntity<Product> findById(@PathVariable Integer id) {
-        return productService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(productService.findById(id));
     }
 
     @Operation(summary = "Crear producto")
     @PostMapping
-    public ResponseEntity<Product> save(@RequestBody Product product) {
+    public ResponseEntity<Product> save(@Valid @RequestBody Product product) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.save(product));
     }
 
     @Operation(summary = "Actualizar producto")
     @PutMapping("/{id}")
-    public ResponseEntity<Product> update(@PathVariable Integer id, @RequestBody Product product) {
-        return productService.update(id, product)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Product> update(@PathVariable Integer id, @Valid @RequestBody Product product) {
+        return ResponseEntity.ok(productService.update(id, product));
+    }
+
+    @Operation(summary = "Actualizar solo el stock de un producto")
+    @PatchMapping("/{id}/stock")
+    public ResponseEntity<Product> actualizarStock(@PathVariable Integer id, @Valid @RequestBody StockRequest request) {
+        return ResponseEntity.ok(productService.actualizarStock(id, request.stock()));
     }
 
     @Operation(summary = "Eliminar producto")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Product> deleteById(@PathVariable Integer id) {
-        return productService.deleteById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Void> deleteById(@PathVariable Integer id) {
+        productService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Listar productos de una categoría")
