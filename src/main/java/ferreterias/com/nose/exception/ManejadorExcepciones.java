@@ -27,6 +27,11 @@ public class ManejadorExcepciones {
         return construir(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
     }
 
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    public ResponseEntity<ErrorRespuesta> credencialesInvalidas(CredencialesInvalidasException ex) {
+        return construir(HttpStatus.UNAUTHORIZED, ex.getMessage(), null);
+    }
+
     @ExceptionHandler(ConflictoException.class)
     public ResponseEntity<ErrorRespuesta> conflicto(ConflictoException ex) {
         return construir(HttpStatus.CONFLICT, ex.getMessage(), null);
