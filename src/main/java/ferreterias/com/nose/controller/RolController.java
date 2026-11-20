@@ -2,11 +2,11 @@ package ferreterias.com.nose.controller;
 
 import ferreterias.com.nose.model.Rol;
 import ferreterias.com.nose.service.RolService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,8 +16,11 @@ import java.util.List;
 @RequestMapping("/api/roles")
 public class RolController {
 
-    @Autowired
-    private RolService rolService;
+    private final RolService rolService;
+
+    public RolController(RolService rolService) {
+        this.rolService = rolService;
+    }
 
     @Operation(summary = "Listar roles")
     @GetMapping
@@ -28,38 +31,31 @@ public class RolController {
     @Operation(summary = "Obtener rol por id")
     @GetMapping("/{id}")
     public ResponseEntity<Rol> findById(@PathVariable Integer id) {
-        return rolService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(rolService.findById(id));
+    }
+
+    @Operation(summary = "Buscar rol por nombre")
+    @GetMapping("/nombre/{nombre}")
+    public ResponseEntity<Rol> findByNombre(@PathVariable String nombre) {
+        return ResponseEntity.ok(rolService.findByNombre(nombre));
     }
 
     @Operation(summary = "Crear rol")
     @PostMapping
-    public ResponseEntity<Rol> save(@RequestBody Rol rol) {
+    public ResponseEntity<Rol> save(@Valid @RequestBody Rol rol) {
         return ResponseEntity.status(HttpStatus.CREATED).body(rolService.save(rol));
     }
 
     @Operation(summary = "Actualizar rol")
     @PutMapping("/{id}")
-    public ResponseEntity<Rol> update(@PathVariable Integer id, @RequestBody Rol rol) {
-        return rolService.update(id, rol)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Rol> update(@PathVariable Integer id, @Valid @RequestBody Rol rol) {
+        return ResponseEntity.ok(rolService.update(id, rol));
     }
 
     @Operation(summary = "Eliminar rol")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Rol> deleteById(@PathVariable Integer id) {
-        return rolService.deleteById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @Operation(summary = "Buscar roles por nombre")
-    @GetMapping("/nombre/{nombre}")
-    public ResponseEntity<Rol> findByNombre(@PathVariable String nombre) {
-        return rolService.findByNombre(nombre)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Void> deleteById(@PathVariable Integer id) {
+        rolService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

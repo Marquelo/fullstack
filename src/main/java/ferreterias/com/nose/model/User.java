@@ -46,6 +46,10 @@ public class User {
     private String contrasena;
 
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "rol_id")
+    private Rol rol;
+
     @Column(name = "acepta_terminos")
     private boolean aceptaTerminos;
 
