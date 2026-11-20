@@ -5,10 +5,13 @@ import ferreterias.com.nose.service.RolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Roles")
 @RestController
 @RequestMapping("/api/roles")
 public class RolController {
@@ -16,11 +19,13 @@ public class RolController {
     @Autowired
     private RolService rolService;
 
+    @Operation(summary = "Listar roles")
     @GetMapping
     public ResponseEntity<List<Rol>> findAll() {
         return ResponseEntity.ok(rolService.findAll());
     }
 
+    @Operation(summary = "Obtener rol por id")
     @GetMapping("/{id}")
     public ResponseEntity<Rol> findById(@PathVariable Integer id) {
         return rolService.findById(id)
@@ -28,11 +33,13 @@ public class RolController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Crear rol")
     @PostMapping
     public ResponseEntity<Rol> save(@RequestBody Rol rol) {
         return ResponseEntity.status(HttpStatus.CREATED).body(rolService.save(rol));
     }
 
+    @Operation(summary = "Actualizar rol")
     @PutMapping("/{id}")
     public ResponseEntity<Rol> update(@PathVariable Integer id, @RequestBody Rol rol) {
         return rolService.update(id, rol)
@@ -40,6 +47,7 @@ public class RolController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Eliminar rol")
     @DeleteMapping("/{id}")
     public ResponseEntity<Rol> deleteById(@PathVariable Integer id) {
         return rolService.deleteById(id)
@@ -47,6 +55,7 @@ public class RolController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Buscar roles por nombre")
     @GetMapping("/nombre/{nombre}")
     public ResponseEntity<Rol> findByNombre(@PathVariable String nombre) {
         return rolService.findByNombre(nombre)
