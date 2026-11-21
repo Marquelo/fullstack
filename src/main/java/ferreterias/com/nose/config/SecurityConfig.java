@@ -42,6 +42,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         // Documentación Swagger
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // Página de errores de Spring: sin esto, un error interno (500) o una ruta
+                        // inexistente (404) se ven como 401 y ocultan la causa real
+                        .requestMatchers("/error").permitAll()
                         // El catálogo se puede consultar sin iniciar sesión
                         .requestMatchers(HttpMethod.GET, "/api/productos/**", "/api/categorias/**").permitAll()
                         // Todo lo demás exige un token válido
