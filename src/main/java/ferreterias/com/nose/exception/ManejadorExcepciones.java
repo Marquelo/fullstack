@@ -53,6 +53,8 @@ public class ManejadorExcepciones {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorRespuesta> cuerpoInvalido(HttpMessageNotReadableException ex) {
+        String causa = ex.getMostSpecificCause().getMessage();
+        System.err.println("Error leyendo JSON: " + causa);
         return construir(HttpStatus.BAD_REQUEST, "El cuerpo de la solicitud no es un JSON válido.", null);
     }
 
