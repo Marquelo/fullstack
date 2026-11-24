@@ -1,15 +1,16 @@
 package ferreterias.com.nose.controller;
 
+import ferreterias.com.nose.dto.ProductoRequest;
+import ferreterias.com.nose.dto.ProductoResponse;
 import ferreterias.com.nose.dto.StockRequest;
-import ferreterias.com.nose.model.Product;
 import ferreterias.com.nose.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,38 +28,44 @@ public class ProductController {
 
     @Operation(summary = "Listar productos")
     @GetMapping
-    public ResponseEntity<List<Product>> findAll() {
-        return ResponseEntity.ok(productService.findAll());
+    public ResponseEntity<List<ProductoResponse>> findAll() {
+        return ResponseEntity.ok(
+                productService.findAll().stream().map(ProductoResponse::desde).toList());
     }
 
     @Operation(summary = "Obtener producto por id")
     @GetMapping("/{id}")
-    public ResponseEntity<Product> findById(@PathVariable Integer id) {
-        return ResponseEntity.ok(productService.findById(id));
+    public ResponseEntity<ProductoResponse> findById(@PathVariable Integer id) {
+        return ResponseEntity.ok(ProductoResponse.desde(productService.findById(id)));
     }
 
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @Operation(summary = "Crear producto")
     @PostMapping
-    public ResponseEntity<Product> save(@Valid @RequestBody Product product) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.save(product));
+    public ResponseEntity<ProductoResponse> save(@Valid @RequestBody ProductoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ProductoResponse.desde(productService.save(request.aProducto())));
     }
 
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @Operation(summary = "Actualizar producto")
     @PutMapping("/{id}")
-    public ResponseEntity<Product> update(@PathVariable Integer id, @Valid @RequestBody Product product) {
-        return ResponseEntity.ok(productService.update(id, product));
+    public ResponseEntity<ProductoResponse> update(@PathVariable Integer id,
+                                                   @Valid @RequestBody ProductoRequest request) {
+        return ResponseEntity.ok(
+                ProductoResponse.desde(productService.update(id, request.aProducto())));
     }
 
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'VENDEDOR')")
     @Operation(summary = "Actualizar solo el stock de un producto")
     @PatchMapping("/{id}/stock")
-    public ResponseEntity<Product> actualizarStock(@PathVariable Integer id, @Valid @RequestBody StockRequest request) {
-        return ResponseEntity.ok(productService.actualizarStock(id, request.stock()));
+    public ResponseEntity<ProductoResponse> actualizarStock(@PathVariable Integer id,
+                                                            @Valid @RequestBody StockRequest request) {
+        return ResponseEntity.ok(
+                ProductoResponse.desde(productService.actualizarStock(id, request.stock())));
     }
 
     @SecurityRequirement(name = "bearerAuth")
@@ -72,13 +79,15 @@ public class ProductController {
 
     @Operation(summary = "Listar productos de una categoría")
     @GetMapping("/categoria/{categoriaId}")
-    public ResponseEntity<List<Product>> findByCategoriaId(@PathVariable Integer categoriaId) {
-        return ResponseEntity.ok(productService.findByCategoriaId(categoriaId));
+    public ResponseEntity<List<ProductoResponse>> findByCategoriaId(@PathVariable Integer categoriaId) {
+        return ResponseEntity.ok(
+                productService.findByCategoriaId(categoriaId).stream().map(ProductoResponse::desde).toList());
     }
 
     @Operation(summary = "Buscar productos por nombre")
     @GetMapping("/nombre/{nombre}")
-    public ResponseEntity<List<Product>> findByNombre(@PathVariable String nombre) {
-        return ResponseEntity.ok(productService.findByNombre(nombre));
+    public ResponseEntity<List<ProductoResponse>> findByNombre(@PathVariable String nombre) {
+        return ResponseEntity.ok(
+                productService.findByNombre(nombre).stream().map(ProductoResponse::desde).toList());
     }
 }
