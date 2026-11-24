@@ -6,6 +6,7 @@ import ferreterias.com.nose.exception.ReglaNegocioException;
 import ferreterias.com.nose.model.Categoria;
 import ferreterias.com.nose.model.Product;
 import ferreterias.com.nose.repository.CategoriaRepository;
+import ferreterias.com.nose.repository.DetallePedidoRepository;
 import ferreterias.com.nose.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +19,14 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoriaRepository categoriaRepository;
+    private final DetallePedidoRepository detallePedidoRepository;
 
-    public ProductService(ProductRepository productRepository, CategoriaRepository categoriaRepository) {
+    public ProductService(ProductRepository productRepository,
+                          CategoriaRepository categoriaRepository,
+                          DetallePedidoRepository detallePedidoRepository) {
         this.productRepository = productRepository;
         this.categoriaRepository = categoriaRepository;
+        this.detallePedidoRepository = detallePedidoRepository;
     }
 
     public List<Product> findAll() {
@@ -66,6 +71,11 @@ public class ProductService {
 
     public void deleteById(Integer id) {
         Product existente = findById(id);
+        if (detallePedidoRepository.existsByProductoId(id)) {
+            throw new ConflictoException(
+                    "No se puede eliminar el producto \"" + existente.getNombre()
+                            + "\": tiene ventas registradas. Puedes dejar su stock en 0 para que no se pueda comprar.");
+        }
         productRepository.delete(existente);
     }
 

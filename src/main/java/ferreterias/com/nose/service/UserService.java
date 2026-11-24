@@ -6,6 +6,7 @@ import ferreterias.com.nose.exception.RecursoNoEncontradoException;
 import ferreterias.com.nose.exception.ReglaNegocioException;
 import ferreterias.com.nose.model.Rol;
 import ferreterias.com.nose.model.User;
+import ferreterias.com.nose.repository.PedidoRepository;
 import ferreterias.com.nose.repository.RolRepository;
 import ferreterias.com.nose.repository.UserRepository;
 import ferreterias.com.nose.security.UsuarioAutenticado;
@@ -34,11 +35,16 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RolRepository rolRepository;
+    private final PedidoRepository pedidoRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, RolRepository rolRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,
+                       RolRepository rolRepository,
+                       PedidoRepository pedidoRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.rolRepository = rolRepository;
+        this.pedidoRepository = pedidoRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -136,7 +142,7 @@ public class UserService {
         return userRepository.save(existente);
     }
 
-    /** Regla de negocio: no se elimina la cuenta propia ni al último administrador. */
+    /** Reglas de negocio: no se elimina la cuenta propia, al último administrador ni a un usuario con compras. */
     public void eliminarComo(UsuarioAutenticado actual, Integer id) {
         if (actual.id().equals(id)) {
             throw new ReglaNegocioException("No puedes eliminar tu propia cuenta activa.");
@@ -144,6 +150,11 @@ public class UserService {
         User objetivo = findById(id);
         if (ADMINISTRADOR.equals(nombreRol(objetivo)) && esUltimoAdministrador()) {
             throw new ReglaNegocioException("Debe existir al menos un administrador en el sistema.");
+        }
+        if (pedidoRepository.existsByClienteId(id)) {
+            throw new ConflictoException(
+                    "No se puede eliminar a \"" + objetivo.getNombreCompleto()
+                            + "\": tiene compras registradas en el historial de ventas.");
         }
         userRepository.delete(objetivo);
     }

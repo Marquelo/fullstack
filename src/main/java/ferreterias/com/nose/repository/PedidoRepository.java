@@ -13,4 +13,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, Integer> {
 
     List<Pedido> findByClienteIdOrderByFechaDesc(Integer clienteId);
 
+    boolean existsByClienteId(Integer clienteId);
+
 }
